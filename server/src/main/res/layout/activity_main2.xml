@@ -5,24 +5,9 @@
     android:layout_height="match_parent"
     tools:context="com.crfchina.server.MainActivity">
 
-    <Button
-        android:id="@+id/bt1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开启服务" />
-
-    <Button
-        android:id="@+id/bt2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/bt1"
-        android:text="绑定服务" />
-
-    <Button
-        android:id="@+id/bt3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/bt2"
-        android:text="调用方法" />
+<android.support.v7.widget.AppCompatTextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="我是服务端！"/>
 
 </RelativeLayout>
