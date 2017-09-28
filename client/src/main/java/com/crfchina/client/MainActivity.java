@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    //监听器获取到新的数据要切换到UI线程进行操作
     private IOnNewBookArrivedListener mOnNewBookArrivedListener =
             new IOnNewBookArrivedListener.Stub() {
                 @Override
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            manager = null;
         }
 
     };

@@ -6,6 +6,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -17,8 +18,8 @@ public class MyService extends Service {
 
     private AtomicBoolean mIsServiceDestoryed = new AtomicBoolean(false);
     private CopyOnWriteArrayList<Book> list;
-    private CopyOnWriteArrayList<IOnNewBookArrivedListener> mListener =
-            new CopyOnWriteArrayList<>();
+    private RemoteCallbackList<IOnNewBookArrivedListener> mListener =
+            new RemoteCallbackList<>();
 
     private static final String TAG = "AIDL 服务端:";
 
@@ -44,23 +45,14 @@ public class MyService extends Service {
 
         @Override
         public void registerListener(IOnNewBookArrivedListener listener) throws RemoteException {
-            if (!mListener.contains(listener)) {
-                mListener.add(listener);
-                Log.i(TAG, "注册监听器成功");
-            } else {
-                Log.i(TAG, "监听器已经注册");
-            }
+            mListener.register(listener);
+            Log.i(TAG, "注册监听器成功");
         }
 
         @Override
         public void unRegisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
-            if (mListener.contains(listener)) {
-                mListener.remove(listener);
-                Log.i(TAG, "移除监听器成功");
-            } else {
-                Log.i(TAG, "移除监听器时发现未包含该监听器");
-            }
-
+            mListener.unregister(listener);
+            Log.i(TAG, "移除监听器成功");
         }
 
         @Override
@@ -106,20 +98,29 @@ public class MyService extends Service {
 
     private void onNewBookArrived(Book book) throws RemoteException {
         list.add(book);
-        Log.i(TAG, "新的书已经添加："+book.toString());
-        for (IOnNewBookArrivedListener listener : mListener) {
-            listener.onNewBookArrived(book);
+        Log.i(TAG, "新的书已经添加：" + book.toString());
+        int i = mListener.beginBroadcast();
+        for (int j = 0; j < i; j++) {
+            IOnNewBookArrivedListener listener = mListener.getBroadcastItem(j);
+            if (listener != null) {
+                try{
+                    listener.onNewBookArrived(book);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
         }
+        mListener.finishBroadcast();
     }
 
     class ServiceWorker implements Runnable {
 
         @Override
         public void run() {
-            while (!mIsServiceDestoryed.get()){
-                try{
+            while (!mIsServiceDestoryed.get()) {
+                try {
                     Thread.sleep(5000);
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 int bookId = list.size() + 1;
